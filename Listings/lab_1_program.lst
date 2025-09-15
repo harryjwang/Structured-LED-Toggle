@@ -1,0 +1,166 @@
+
+
+
+ARM Macro Assembler    Page 1 
+
+
+    1 00000000         ;*------------------------------------------------------
+                       ----------------------
+    2 00000000         ;* Name:    Lab_1_program.s 
+    3 00000000         ;* Purpose: This code flashes one LED at approximately 1
+                        Hz frequency 
+    4 00000000         ;* Author:  Rasoul Keshavarzi 
+    5 00000000         ;*------------------------------------------------------
+                       ----------------------*/
+    6 00000000                 THUMB                        ; Declare THUMB ins
+                                                            truction set 
+    7 00000000                 AREA             My_code, CODE, READONLY ; 
+    8 00000000                 EXPORT           __MAIN      ; Label __MAIN is u
+                                                            sed externally q
+    9 00000000                 ENTRY
+   10 00000000         __MAIN
+   11 00000000         ; The following operations can be done in simpler method
+                       s. They are done in this 
+   12 00000000         ; way to practice different memory addressing methods. 
+   13 00000000         ; MOV moves into the lower word (16 bits) and clears the
+                        upper word
+   14 00000000         ; MOVT moves into the upper word
+   15 00000000         ; show several ways to create an address using a fixed o
+                       ffset and register as offset
+   16 00000000         ;   and several examples are used below
+   17 00000000         ; NOTE MOV can move ANY 16-bit, and only SOME >16-bit, c
+                       onstants into a register
+   18 00000000         ; BNE and BEQ can be used to branch on the last operatio
+                       n being Not Equal or EQual to zero
+   19 00000000         ;
+   20 00000000 F44F 4240       MOV              R2, #0xC000 ; move 0xC000 into 
+                                                            R2
+   21 00000004 F04F 0400       MOV              R4, #0x0    ; init R4 register 
+                                                            to 0 to build addre
+                                                            ss
+   22 00000008 F2C2 0409       MOVT             R4, #0x2009 ; assign 0x20090000
+                                                             into R4
+   23 0000000C 4414            ADD              R4, R4, R2  ; add 0xC000 to R4 
+                                                            to get 0x2009C000 
+   24 0000000E         
+   25 0000000E         
+   26 0000000E F04F 037C       MOV              R3, #0x0000007C ; move initial 
+                                                            value for port P2 i
+                                                            nto R3 
+   27 00000012 6423            STR              R3, [R4, #0x40] ; Turn off five
+                                                             LEDs on port 2
+   28 00000014         
+   29 00000014         
+   30 00000014 F04F 4330       MOV              R3, #0xB0000000 ; move initial 
+                                                            value for port P1 i
+                                                            nto R3
+   31 00000018 6223            STR              R3, [R4, #0x20] ; Turn off thre
+                                                            e LEDs on Port 1 us
+                                                            ing an offset
+   32 0000001A         
+   33 0000001A         
+   34 0000001A         
+   35 0000001A F04F 0220       MOV              R2, #0x20   ; put Port 1 offset
+                                                             into R2 for user l
+                                                            ater 
+
+
+
+ARM Macro Assembler    Page 2 
+
+
+   36 0000001E         
+   37 0000001E         loopb
+   38 0000001E         ; resets the counter (start of cycle resets)
+   39 0000001E         
+   40 0000001E F642 402B       MOV              R0, #0x2C2B ; Initialize R0 low
+                                                            er word for countdo
+                                                            wn
+   41 00000022 F2C0 000A       MOVT             R0, #0x000A
+   42 00000026         ; We calcaulted R0 (number of cycles) by finding the amo
+                       unt hertz it takes per cycle and setting it to 0.5s
+   43 00000026         ; (3/4MHz) * (number of cycles) = 0.5s
+   44 00000026         ; number of cycles = 0.5s * ((4 * 10^6 Hz)/3)
+   45 00000026         ; number of cycles = 666,666.666667
+   46 00000026         ; number of cycles (in hex = 0xA2C2B)
+   47 00000026         ; using MOV and MOVT, we manipulate the number of cycles
+                        (R0) to start at 0x000A2C2B
+   48 00000026         
+   49 00000026         loop
+   50 00000026         ; Main loop that iterates from start of the cycle until 
+                       it reaches 0
+   51 00000026         
+   52 00000026 3801            SUBS             R0, #1      ; Decrement r0 and 
+                                                            set the N,Z,C statu
+                                                            s bits
+   53 00000028         ;
+   54 00000028         ;  Approximately five lines of code
+   55 00000028         ;  are required to complete the program 
+   56 00000028         ;
+   57 00000028         
+   58 00000028 D1FD            BNE              loop
+   59 0000002A         ; Once counter reaches 0, below code gets executed (flip
+                        28th bit to change state (on/off) of the first led (P1.
+                       28))
+   60 0000002A         
+   61 0000002A         
+   62 0000002A F083 5380       EOR              R3, #1 << 28
+   63 0000002E         ; toggle R3 (first led on/off register) with EOR (XOR in
+                        ARM) to toggle between 0 and 1 each time it gets to thi
+                       s point
+   64 0000002E         
+   65 0000002E 50A3            STR              R3, [R4, R2] ; write R3 port 1,
+                                                             YOU NEED to toggle
+                                                             bit 28 first
+   66 00000030         
+   67 00000030         
+   68 00000030 E7F5            B                loopb       ; This branch has b
+                                                            een fixed!
+   69 00000032         
+   70 00000032                 END
+Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M3 --apcs=interw
+ork --depend=.\objects\lab_1_program.d -o.\objects\lab_1_program.o -I.\RTE\_Tar
+get_1 -IC:\Keil_v5\Keil\LPC1700_DFP\2.7.1\Device\Include -IC:\Keil_v5\ARM\CMSIS
+\Include --predefine="__EVAL SETA 1" --predefine="__UVISION_VERSION SETA 529" -
+-predefine="LPC175x_6x SETA 1" --list=.\listings\lab_1_program.lst Lab_1_progra
+m.s
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+Relocatable symbols
+
+My_code 00000000
+
+Symbol: My_code
+   Definitions
+      At line 7 in file Lab_1_program.s
+   Uses
+      None
+Comment: My_code unused
+__MAIN 00000000
+
+Symbol: __MAIN
+   Definitions
+      At line 10 in file Lab_1_program.s
+   Uses
+      At line 8 in file Lab_1_program.s
+Comment: __MAIN used once
+loop 00000026
+
+Symbol: loop
+   Definitions
+      At line 49 in file Lab_1_program.s
+   Uses
+      At line 58 in file Lab_1_program.s
+Comment: loop used once
+loopb 0000001E
+
+Symbol: loopb
+   Definitions
+      At line 37 in file Lab_1_program.s
+   Uses
+      At line 68 in file Lab_1_program.s
+Comment: loopb used once
+4 symbols
+337 symbols in table
