@@ -1,2 +1,10 @@
 # Structured-LED-Toggle
-Expanded LED control by introducing structured assembly with loops, GPIO offsets, and better timing separation.
+A step into more structured assembly programming:
+
+Organized GPIO addressing with offsets.
+
+Multi-LED control using loop counters.
+
+Clean separation of control vs. timing.
+
+Built and tested with Keil µVision.
